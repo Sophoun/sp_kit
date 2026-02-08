@@ -1038,7 +1038,142 @@ final counter = ValueNotifierWithListener<int>(0, (value) {
 counter.value = 1; // This will print "Counter changed to: 1"
 ```
 
-## CLI Tools
+### 12. Feature Flag
+
+The `sp_kit` package includes a feature flag system that allows you to dynamically enable or disable features in your application. This is useful for A/B testing, rolling out new features gradually, or hiding unfinished features.
+
+#### Core Concepts
+
+-   **`SpFeatureFlag`**: An abstract class that holds the feature flags for your application. You should extend this class to define your own feature flags.
+-   **`SpFlag`**: A class that represents a single feature flag. It contains a boolean `enabled` property. You can extend this class to add more properties to your feature flags.
+-   **`SpFeatureGuard`**: A widget that conditionally shows or hides its child based on a feature flag.
+
+#### Static Feature Flags
+
+Static feature flags are defined in your code and are not fetched from a remote source.
+
+##### Example
+
+First, define your feature flags by extending `SpFlag`:
+
+```dart
+// lib/flags/my_feature_flags.dart
+import 'package:sp_kit/sp_kit.dart';
+
+class NewVersionFlag extends SpFlag {
+  NewVersionFlag(super.enabled);
+  final String version = "1.0.1-pro";
+}
+```
+
+Next, create a class that extends `SpFeatureFlag` and register your flags:
+
+```dart
+// lib/flags/my_feature_flags.dart
+class StaticFeatureFlag extends SpFeatureFlag {
+  @override
+  Map<String, SpFlag> get featureFlags => {
+    'new_version': NewVersionFlag(true),
+  };
+}
+```
+
+Finally, register your feature flags in the `FlutterBase` widget:
+
+```dart
+// In your main application setup
+FlutterBase(
+  // ...
+  featureFlag: StaticFeatureFlag(),
+  child: MaterialApp.router(
+    // ...
+  ),
+);
+```
+
+#### Remote Feature Flags
+
+Remote feature flags are fetched from a remote source, such as a REST API. This allows you to enable or disable features without releasing a new version of your app.
+
+##### Example
+
+First, define your feature flags:
+
+```dart
+// lib/flags/my_feature_flags.dart
+import 'package:sp_kit/sp_kit.dart';
+
+class RemoteFlag extends SpFlag {
+  RemoteFlag(super.enabled);
+}
+```
+
+Next, create a class that extends `SpFeatureFlag` and fetches the flags from a remote source:
+
+```dart
+// lib/flags/my_feature_flags.dart
+class RemoteFeatureFlag extends SpFeatureFlag {
+  @override
+  final Map<String, SpFlag> featureFlags = {};
+
+  Future<void> fetchFlags() async {
+    // Fetch flags from your remote source
+    final remoteFlags = await MyApiService.fetchFlags();
+
+    final flags = <String, SpFlag>{};
+    for (var flag in remoteFlags.entries) {
+      flags[flag.key] = RemoteFlag(flag.value);
+    }
+
+    updateFeatureFlags(flags);
+  }
+}
+```
+
+Then, you can fetch the flags when your app starts:
+
+```dart
+// In your main application setup
+final remoteFeatureFlag = RemoteFeatureFlag();
+await remoteFeatureFlag.fetchFlags();
+
+FlutterBase(
+  // ...
+  featureFlag: remoteFeatureFlag,
+  child: MaterialApp.router(
+    // ...
+  ),
+);
+```
+
+#### Using `SpFeatureGuard`
+
+The `SpFeatureGuard` widget allows you to show or hide a widget based on a feature flag.
+
+```dart
+import 'package:sp_kit/sp_kit.dart';
+
+SpFeatureGuard(
+  flagKey: 'new_version',
+  on: MyNewWidget(),
+  off: MyOldWidget(), // Optional
+)
+```
+
+If the `new_version` flag is enabled, `MyNewWidget` will be shown. Otherwise, `MyOldWidget` will be shown. If `off` is not provided, nothing will be shown.
+
+#### Accessing Flag Values
+
+You can also access the flag values directly in your code:
+
+```dart
+import 'package:sp_kit/sp_kit.dart';
+
+final newVersionFlag = SpFeatureFlag.getFeature('new_version') as NewVersionFlag;
+print(newVersionFlag.version); // 1.0.1-pro
+```
+
+## 13. CLI Tools
 
 The `sp_kit` package includes a command-line interface (CLI) tool that provides utilities to streamline development workflows, such as creating new applications and adding features.
 
