@@ -6,7 +6,7 @@ repository: https://github.com/sophoun/sp_flkit
 issue_tracker: https://github.com/sophoun/sp_flkit/issues
 
 environment:
-  sdk: ^3.9.0-333.2.beta
+  sdk: ^3.11.0-296.4.beta
   flutter: ">=1.17.0"
 
 executables:

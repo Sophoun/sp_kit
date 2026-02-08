@@ -1,3 +1,4 @@
+import 'package:example/flags/static_feature_flag.dart';
 import 'package:example/lang/app_lang.dart';
 import 'package:example/lang/en.dart';
 import 'package:example/lang/kh.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
       routerConfig: appRouter.config(),
       themeMode: ThemeMode.dark,
       // messageDialogWidget: DialgOverride(),
+      featureFlag: StaticFeatureFlag(),
     );
   }
 }

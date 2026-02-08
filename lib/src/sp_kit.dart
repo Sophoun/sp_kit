@@ -22,6 +22,7 @@ class SpKit extends StatelessWidget {
     this.themeMode,
     this.body,
     this.localizationsDelegates,
+    SpFeatureFlag? featureFlag,
   }) {
     /// Assign theme if it's missing
     theme ??= SpTheme.light;
@@ -38,6 +39,9 @@ class SpKit extends StatelessWidget {
 
     /// Initialize share preferences
     Pref.init();
+
+    /// Initialize feature flag
+    spFeatureFlagGlobally = featureFlag;
   }
 
   late LocaleRegister? locale;
