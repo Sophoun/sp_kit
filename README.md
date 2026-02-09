@@ -1040,17 +1040,17 @@ counter.value = 1; // This will print "Counter changed to: 1"
 
 ### 12. Feature Flag
 
-The `sp_kit` package includes a feature flag system that allows you to dynamically enable or disable features in your application. This is useful for A/B testing, rolling out new features gradually, or hiding unfinished features.
+The `sp_kit` package includes a reactive feature flag system that allows you to dynamically enable or disable features in your application. When you update a feature flag, any widgets that depend on it will automatically rebuild. This is useful for A/B testing, rolling out new features gradually, or hiding unfinished features.
 
 #### Core Concepts
 
--   **`SpFeatureFlag`**: An abstract class that holds the feature flags for your application. You should extend this class to define your own feature flags.
--   **`SpFlag`**: A class that represents a single feature flag. It contains a boolean `enabled` property. You can extend this class to add more properties to your feature flags.
--   **`SpFeatureGuard`**: A widget that conditionally shows or hides its child based on a feature flag.
+- **`SpFeatureFlag`**: An abstract class that holds the feature flags for your application. You should extend this class to define your own feature flags.
+- **`SpFlag`**: A class that represents a single feature flag. It contains a boolean `enabled` property. You can extend this class to add more properties to your feature flags.
+- **`SpFeatureGuard`**: A widget that conditionally shows or hides its child based on a feature flag. It automatically rebuilds when the flag's value changes.
 
 #### Static Feature Flags
 
-Static feature flags are defined in your code and are not fetched from a remote source.
+Static feature flags are defined in your code.
 
 ##### Example
 
@@ -1073,7 +1073,7 @@ Next, create a class that extends `SpFeatureFlag` and register your flags:
 class StaticFeatureFlag extends SpFeatureFlag {
   @override
   Map<String, SpFlag> get featureFlags => {
-    'new_version': NewVersionFlag(true),
+    'new_version': NewVersionFlag(false),
   };
 }
 ```
@@ -1082,33 +1082,24 @@ Finally, register your feature flags in the `FlutterBase` widget:
 
 ```dart
 // In your main application setup
+final featureFlag = StaticFeatureFlag();
+
 FlutterBase(
   // ...
-  featureFlag: StaticFeatureFlag(),
+  featureFlag: featureFlag,
   child: MaterialApp.router(
     // ...
   ),
 );
 ```
 
-#### Remote Feature Flags
+#### Remote Feature Flags & Reactivity
 
-Remote feature flags are fetched from a remote source, such as a REST API. This allows you to enable or disable features without releasing a new version of your app.
+You can update feature flags at any time, and the UI will react automatically. This is useful for remote feature flags that are fetched from a server.
 
 ##### Example
 
-First, define your feature flags:
-
-```dart
-// lib/flags/my_feature_flags.dart
-import 'package:sp_kit/sp_kit.dart';
-
-class RemoteFlag extends SpFlag {
-  RemoteFlag(super.enabled);
-}
-```
-
-Next, create a class that extends `SpFeatureFlag` and fetches the flags from a remote source:
+Create a class that extends `SpFeatureFlag` and fetches the flags from a remote source:
 
 ```dart
 // lib/flags/my_feature_flags.dart
@@ -1118,19 +1109,20 @@ class RemoteFeatureFlag extends SpFeatureFlag {
 
   Future<void> fetchFlags() async {
     // Fetch flags from your remote source
-    final remoteFlags = await MyApiService.fetchFlags();
+    final remoteFlags = await MyApiService.fetchFlags(); // This is a mock service
 
     final flags = <String, SpFlag>{};
     for (var flag in remoteFlags.entries) {
-      flags[flag.key] = RemoteFlag(flag.value);
+      flags[flag.key] = SpFlag(flag.value);
     }
 
+    // Update the flags
     updateFeatureFlags(flags);
   }
 }
 ```
 
-Then, you can fetch the flags when your app starts:
+Then, you can fetch the flags when your app starts or at any other time:
 
 ```dart
 // In your main application setup
@@ -1144,11 +1136,18 @@ FlutterBase(
     // ...
   ),
 );
+
+// You can update the flags at any time
+Future.delayed(const Duration(seconds: 5), () {
+  remoteFeatureFlag.updateFeatureFlags({
+    'new_feature': SpFlag(true),
+  });
+});
 ```
 
 #### Using `SpFeatureGuard`
 
-The `SpFeatureGuard` widget allows you to show or hide a widget based on a feature flag.
+The `SpFeatureGuard` widget allows you to show or hide a widget based on a feature flag. It automatically rebuilds when the flag's value changes.
 
 ```dart
 import 'package:sp_kit/sp_kit.dart';
