@@ -123,35 +123,40 @@ class _BuildLocalize extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LocalizeInherited(
-      register: locale!,
-      child: Stack(
-        textDirection: TextDirection.rtl,
-        children: [
-          child ?? SizedBox.shrink(),
-          StreamBuilder(
-            stream: messageDialog.stream,
-            builder: (context, value) {
-              final message = messageDialogWidget ?? MessageDialog();
-              message.setData(value.data?.value);
-              return Visibility(
-                key: UniqueKey(),
-                visible: value.data?.key == true,
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: message,
+    return ValueListenableBuilder<bool>(
+      valueListenable: isAppLoading,
+      builder: (context, isLoading, _) {
+        return StreamBuilder(
+          stream: messageDialog.stream,
+          builder: (context, snapshot) {
+            final isDialogVisible = snapshot.data?.key == true;
+            final message = messageDialogWidget ?? MessageDialog();
+            message.setData(snapshot.data?.value);
+
+            return PopScope(
+              canPop: !isLoading && !isDialogVisible,
+              child: LocalizeInherited(
+                register: locale!,
+                child: Stack(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    child ?? const SizedBox.shrink(),
+                    Visibility(
+                      key: UniqueKey(),
+                      visible: isDialogVisible,
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: message,
+                      ),
+                    ),
+                    Visibility(visible: isLoading, child: loadingWidget),
+                  ],
                 ),
-              );
-            },
-          ),
-          ValueListenableBuilder(
-            valueListenable: isAppLoading,
-            builder: (context, value, child) {
-              return Visibility(visible: value, child: loadingWidget);
-            },
-          ),
-        ],
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
