@@ -41,7 +41,7 @@ class SpKit extends StatelessWidget {
     Pref.init();
 
     /// Initialize feature flag
-    spFeatureFlagGlobally = featureFlag;
+    featureFlag?.logFlags();
   }
 
   late LocaleRegister? locale;

@@ -3,7 +3,9 @@ import 'package:sp_kit/sp_kit.dart';
 /// Example of feature flag that extends [SpFeatureFlag]
 class StaticFeatureFlag extends SpFeatureFlag {
   @override
-  Map<String, SpFlag> get featureFlags => {'new_version': NewVersionFlag(true)};
+  Map<String, SpFlag> get featureFlags => {
+    'new_version': NewVersionFlag(false),
+  };
 }
 
 /// Example of feature flag that extends [SpFlag]

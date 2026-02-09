@@ -22,9 +22,16 @@ class MyApp extends StatelessWidget {
     ..registerLazy((c) => MockService(mockNet: c.get<MockNet>()))
     ..register(HomeVm());
 
+  final featureFlag = StaticFeatureFlag();
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration(seconds: 3), () {
+      featureFlag.updateFeatureFlags({"new_version": NewVersionFlag(true)});
+      log("Feature flags updated");
+    });
+
     return SpKit(
       locale: LocaleRegister<AppLang>()
         ..register(En(lang: Lang.en))
@@ -34,7 +41,7 @@ class MyApp extends StatelessWidget {
       routerConfig: appRouter.config(),
       themeMode: ThemeMode.dark,
       // messageDialogWidget: DialgOverride(),
-      featureFlag: StaticFeatureFlag(),
+      featureFlag: featureFlag,
     );
   }
 }

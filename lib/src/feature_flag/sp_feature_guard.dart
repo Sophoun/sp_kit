@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:sp_kit/src/feature_flag/sp_feature_flag.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 /// Use it to wrap the widget that you want to hide and show based on the feature flag.
 /// [flagKey] is the key of the feature flag.
@@ -20,7 +20,12 @@ class SpFeatureGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final flag = SpFeatureFlag.getFeature(flagKey);
-    return flag.enabled ? on : off ?? const SizedBox.shrink();
+    return featureFlagGlobally.builder(
+      build: (_) {
+        final flag = SpFeatureFlag.getFeature(flagKey);
+        log("Checking feature flag: $flagKey flag: $flag");
+        return flag.enabled ? on : off ?? const SizedBox.shrink();
+      },
+    );
   }
 }
