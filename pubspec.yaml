@@ -10,9 +10,9 @@ environment:
   flutter: ">=1.17.0"
 
 executables:
-  sp_kit: bin/sp_kit.dart
-  create_app: bin/create_app.dart
-  feature_add: bin/feature_add.dart
+  sp_kit: sp_kit.dart
+  create_app: create_app.dart
+  feature_add: feature_add.dart
 
 dependencies:
   flutter:
