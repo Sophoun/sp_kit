@@ -144,12 +144,23 @@ class _BuildLocalize extends StatelessWidget {
                     Visibility(
                       key: UniqueKey(),
                       visible: isDialogVisible,
-                      child: Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: message,
+                      child: PopScope(
+                        canPop: false,
+                        onPopInvokedWithResult: (didPop, result) => false,
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: message,
+                        ),
                       ),
                     ),
-                    Visibility(visible: isLoading, child: loadingWidget),
+                    Visibility(
+                      visible: isLoading,
+                      child: PopScope(
+                        canPop: false,
+                        onPopInvokedWithResult: (didPop, result) => false,
+                        child: loadingWidget,
+                      ),
+                    ),
                   ],
                 ),
               ),
