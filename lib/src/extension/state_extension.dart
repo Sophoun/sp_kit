@@ -8,6 +8,13 @@ import 'package:sp_kit/sp_kit.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Convert any value to vale notifier
+extension ToValueNotifier<T> on T {
+  ValueNotifier<T> get notifier {
+    return ValueNotifier(this);
+  }
+}
+
 /// Vallue notifier builder function
 extension ValueNotifierAsWidgetBuilder<T> on ValueNotifier<T?> {
   /// Converts the ValueNotifier to a Widget that rebuilds when the value changes.

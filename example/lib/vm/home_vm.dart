@@ -6,7 +6,7 @@ class HomeVm extends ChangeNotifier {
   late final mockService = inject<MockService>();
 
   /// Counter variable
-  final counter = ValueNotifier(10);
+  final counter = 10.notifier;
 
   /// Mock value
   final mockValue = ValueNotifier("unknow");
