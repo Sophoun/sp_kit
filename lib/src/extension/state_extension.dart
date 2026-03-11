@@ -245,3 +245,71 @@ void showSnackBar(String message) {
     material.SnackBar(content: Text(message)),
   );
 }
+
+/// Observer: it's for the type provider to Rx widget.
+abstract class Observer {
+  void update();
+}
+
+/// Observer proxy: it's hold our observer to build the Rx widget.
+class ObserverProxy {
+  static Observer? proxy;
+}
+
+/// Reactive: It's a type that make the update happened when the value change
+/// and register widget observer to listener via proxy.
+class Reactive<T> {
+  T _value;
+  final Set<Observer> _listeners = {};
+
+  Reactive(this._value);
+
+  T get value {
+    if (ObserverProxy.proxy != null) {
+      _listeners.add(ObserverProxy.proxy!);
+    }
+    return _value;
+  }
+
+  set value(T value) {
+    if (_value == value) return;
+    _value = value;
+    for (var listener in _listeners) {
+      listener.update();
+    }
+  }
+}
+
+/// Extend any value to reactive type
+extension ReactiveExtension<T> on T {
+  Reactive<T> get rx {
+    return Reactive<T>(this);
+  }
+}
+
+/// Rx widget: work with reactive type. It's rebuild if the reactive value change.
+class Rx extends material.StatefulWidget {
+  const Rx(this.builder, {super.key});
+
+  final Widget Function() builder;
+
+  @override
+  State<Rx> createState() => _RxState();
+}
+
+class _RxState extends material.State<Rx> implements Observer {
+  @override
+  material.Widget build(material.BuildContext context) {
+    ObserverProxy.proxy = this;
+    final notifierWidget = widget.builder();
+    ObserverProxy.proxy = null;
+    return notifierWidget;
+  }
+
+  @override
+  void update() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+}
