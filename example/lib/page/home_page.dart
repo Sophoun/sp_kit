@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          homeVm.counter.builder(build: (value) => Text(t.count(value ?? 0))),
+          homeVm.counter.builder(build: (value) => Text(t.count(value))),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -131,7 +131,7 @@ class HomePage extends StatelessWidget {
               selectAllOnFocus: true,
             ),
           ),
-          homeVm.mockValue.builder(build: (value) => Text(value ?? "")),
+          homeVm.mockValue.builder(build: (value) => Text(value)),
           ElevatedButton(
             onPressed: () => homeVm.getMockData(),
             child: const Text("Get Mock Data"),
