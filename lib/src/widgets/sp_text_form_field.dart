@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 /// Provide the base form field to easy handle with value notifier
 // ignore: must_be_immutable
@@ -45,7 +46,7 @@ class SpTextFormField<T> extends StatefulWidget {
     );
   }
 
-  final ValueNotifier<T?> value;
+  final Reactive<T> value;
   final TextInputType keyboardType;
   InputDecoration? decoration;
   final Converter<T>? converter;
@@ -79,7 +80,7 @@ class _SpTextFormFieldState<T> extends State<SpTextFormField<T>> {
   TextEditingController? controller;
 
   /// Listen text change from the outside
-  void outsideTextChangesListener() {
+  void outsideTextChangesListener(T value) {
     log("changes: ${widget.label}, ${widget.value.value}");
     // Update value
     controller?.value = TextEditingValue(
@@ -134,7 +135,7 @@ class _SpTextFormFieldState<T> extends State<SpTextFormField<T>> {
               (widget.converter == null
                       ? newValue
                       : widget.converter?.toValue?.call(newValue))
-                  as T?;
+                  as T;
         } catch (e) {
           throw Exception(
             "Please, provide `converter` property to convert value from string to ${T.toString()}",

@@ -8,13 +8,6 @@ import 'package:sp_kit/sp_kit.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Convert any value to vale notifier
-extension ToValueNotifier<T> on T {
-  ValueNotifier<T> get notifier {
-    return ValueNotifier(this);
-  }
-}
-
 /// Vallue notifier builder function
 extension ValueNotifierAsWidgetBuilder<T> on ValueNotifier<T> {
   /// Converts the ValueNotifier to a Widget that rebuilds when the value changes.
@@ -268,9 +261,11 @@ class ObserverProxy {
 class Reactive<T> {
   T _value;
   final Set<Observer> _listeners = {};
+  final Set<Function(T value)> _updateListeners = {};
 
   Reactive(this._value);
 
+  /// Read value from reactive and get listener from proxy to register.
   T get value {
     if (ObserverProxy.proxy != null) {
       _listeners.add(ObserverProxy.proxy!);
@@ -278,12 +273,26 @@ class Reactive<T> {
     return _value;
   }
 
+  /// Set new value and notify all listeners
   set value(T value) {
     if (_value == value) return;
     _value = value;
     for (var listener in _listeners) {
       listener.update();
     }
+    for (var listener in _updateListeners) {
+      listener(value);
+    }
+  }
+
+  /// Add value change listener manually
+  void addListener(void Function(T value) listener) {
+    _updateListeners.add(listener);
+  }
+
+  /// Remove value change listener manually
+  void removeListener(void Function(T value) listener) {
+    _updateListeners.remove(listener);
   }
 }
 

@@ -20,6 +20,7 @@ class SpFeatureGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return featureFlagGlobally.builder(
       build: (_) {
         final flag = SpFeatureFlag.getFeature(flagKey);

@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          homeVm.counter.builder(build: (value) => Text(t.count(value))),
+          Rx(() => Text(t.count(homeVm.counter.value))),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -155,13 +155,13 @@ class HomePage extends StatelessWidget {
             onPressed: () => showSnackBar("Hello from snakebar :snake:"),
             child: const Text("Show snackbar"),
           ),
-          [homeVm.counter, homeVm.mockValue].builder(
-            build: (value) => Text(t.count(value.first ?? 0) + value[1]),
+          Rx(
+            () => Text(t.count(homeVm.counter.value) + homeVm.mockValue.value),
           ),
-          combineValueNotifierT2(
-            homeVm.counter,
-            homeVm.mockValue,
-            (t1, t2) => Text("Count: $t1, mock value is: $t2"),
+          Rx(
+            () => Text(
+              "Count: ${homeVm.counter.value}, mock value is: ${homeVm.mockValue.value}",
+            ),
           ),
           Skeleton.circular(width: 100, height: 100),
           Skeleton.rectangular(width: 100, height: 12),
