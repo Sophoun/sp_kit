@@ -20,7 +20,7 @@ This library exposes a range of modules to streamline your Flutter development. 
 - **`sp_kit.dart`**: The main entry point of the library, providing the `FlutterBase` root widget.
 - **`app_localize.dart` & `locale_register.dart`**: Core components for the localization system.
 - **`service_locator.dart`**: The dependency injection container.
-- **`state_extension.dart`**: Extensions for state management, including `getVm` and the `isAppLoading` notifier.
+- **`state_extension.dart`**: Extensions for state management, including `getVm`, the `isAppLoading` notifier, and the **Observer pattern** (`Observe`, `ObserverValue`).
 - **`screen_extension.dart`**: Extensions for creating responsive UI with `ScreenUtil`.
 - **`spacing_extension.dart`**: Extensions for simplified padding and spacing.
 - **`number_extension.dart`**: Extensions for number formatting and checking null/zero values.
@@ -1172,7 +1172,41 @@ final newVersionFlag = SpFeatureFlag.getFeature('new_version') as NewVersionFlag
 print(newVersionFlag.version); // 1.0.1-pro
 ```
 
-## 13. CLI Tools
+### 13. Observer Pattern
+
+The Observer pattern provides a simple and reactive way to manage state. By using `ObserverValue` and the `Observe` widget, your UI automatically rebuilds whenever the underlying data changes, without the need for manual `addListener` or `notifyListeners()`.
+
+#### Core Components
+
+- **`.ob`**: An extension on any type to convert it into an `ObserverValue`.
+- **`Observe`**: A widget that tracks any `ObserverValue` accessed within its builder and rebuilds when they change.
+
+#### Usage Example
+
+```dart
+import 'package:sp_kit/sp_kit.dart';
+
+// Define observable values (e.g., in your ViewModel or Controller)
+final counter = 0.ob;
+final status = "Idle".ob;
+
+// In your Widget build method:
+Observe(() => Column(
+  children: [
+    Text("Status: ${status.value}"),
+    Text("Count: ${counter.value}"),
+    ElevatedButton(
+      onPressed: () {
+        counter.value++;
+        status.value = "Incrementing...";
+      },
+      child: const Text("Add"),
+    ),
+  ],
+))
+```
+
+### 14. CLI Tools
 
 The `sp_kit` package includes a command-line interface (CLI) tool that provides utilities to streamline development workflows, such as creating new applications and adding features.
 

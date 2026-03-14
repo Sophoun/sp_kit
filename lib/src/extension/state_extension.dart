@@ -253,11 +253,20 @@ void showSnackBar(String message) {
 /// Observer: it's for the type provider to Rx widget.
 abstract class Observer {
   void update();
+  void track(ObserverValue observable);
 }
 
 /// Observer proxy: it's hold our observer to build the Rx widget.
 class ObserverProxy {
-  static Observer? proxy;
+  static final List<Observer> _stack = [];
+  static Observer? get proxy => _stack.lastOrNull;
+  static void push(Observer observer) {
+    _stack.add(observer);
+  }
+
+  static void pop() {
+    _stack.removeLast();
+  }
 }
 
 /// ObserverValue: It's a type that make the update happened when the value change
@@ -273,6 +282,7 @@ class ObserverValue<T> {
   T get value {
     if (ObserverProxy.proxy != null) {
       _listeners.add(ObserverProxy.proxy!);
+      ObserverProxy.proxy?.track(this);
     }
     return _value;
   }
@@ -281,10 +291,10 @@ class ObserverValue<T> {
   set value(T value) {
     if (_value == value) return;
     _value = value;
-    for (var listener in _listeners) {
+    for (var listener in _listeners.toSet()) {
       listener.update();
     }
-    for (var listener in _updateListeners) {
+    for (var listener in _updateListeners.toSet()) {
       listener(value);
     }
   }
@@ -297,6 +307,11 @@ class ObserverValue<T> {
   /// Remove value change listener manually
   void removeListener(void Function(T value) listener) {
     _updateListeners.remove(listener);
+  }
+
+  /// Remove observer
+  void removeObserver(Observer observer) {
+    _listeners.remove(observer);
   }
 }
 
@@ -318,12 +333,22 @@ class Observe extends material.StatefulWidget {
 }
 
 class _ObserveState extends material.State<Observe> implements Observer {
+  final Set<ObserverValue> _observableValues = {};
+
   @override
   material.Widget build(material.BuildContext context) {
-    ObserverProxy.proxy = this;
-    final observeWidget = widget.builder();
-    ObserverProxy.proxy = null;
-    return observeWidget;
+    _clearDependencies();
+    ObserverProxy.push(this);
+    try {
+      return widget.builder();
+    } finally {
+      ObserverProxy.pop();
+    }
+  }
+
+  @override
+  void track(ObserverValue<dynamic> observable) {
+    _observableValues.add(observable);
   }
 
   @override
@@ -331,5 +356,19 @@ class _ObserveState extends material.State<Observe> implements Observer {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  @override
+  void dispose() {
+    _clearDependencies();
+    super.dispose();
+  }
+
+  // Sever all ties
+  void _clearDependencies() {
+    for (var observable in _observableValues) {
+      observable.removeObserver(this);
+    }
+    _observableValues.clear();
   }
 }
