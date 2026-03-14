@@ -953,24 +953,54 @@ counter.value = 1;
 
 ### 12. Feature Flag
 
-The `sp_kit` package includes a reactive feature flag system.
+The `sp_kit` package includes a reactive feature flag system to toggle features and manage configuration dynamically.
 
-#### Core Concepts
+#### Define and Register Flags
 
-- **`SpFeatureFlag`**: Abstract class for defining feature flags.
-- **`SpFlag`**: Represents a single feature flag.
-- **`SpFeatureGuard`**: Widget that shows/hides content based on a flag.
+Use `SpFlag` to define your features and `SpFeatureFlag.registerFlags` to initialize them. `SpFlag` can also hold a generic value for additional configuration.
+
+```dart
+import 'package:sp_kit/sp_kit.dart';
+
+void main() {
+  SpFeatureFlag.registerFlags({
+    SpFlag(
+      key: 'experimental_mode',
+      enabled: true,
+      description: 'Enables experimental UI features',
+      value: 'v2_layout', // Optional generic value
+    ),
+    SpFlag(
+      key: 'maintenance_mode',
+      enabled: false,
+    ),
+  });
+}
+```
 
 #### Using `SpFeatureGuard`
+
+Wrap your widgets with `SpFeatureGuard` to conditionally render content. It reactively rebuilds whenever the global feature flag state is updated.
 
 ```dart
 import 'package:sp_kit/sp_kit.dart';
 
 SpFeatureGuard(
-  flagKey: 'new_version',
-  on: MyNewWidget(),
-  off: MyOldWidget(), // Optional
+  flagKey: 'experimental_mode',
+  on: ExperimentalDashboard(),
+  off: StandardDashboard(), // Optional: defaults to SizedBox.shrink()
 )
+```
+
+#### Programmatic Access
+
+Retrieve flags directly using `SpFeatureFlag.getFeature(key)`.
+
+```dart
+final flag = SpFeatureFlag.getFeature('experimental_mode');
+if (flag.enabled) {
+  print('Config value: ${flag.value}');
+}
 ```
 
 ### 13. Observer Pattern
