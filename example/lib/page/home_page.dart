@@ -76,7 +76,7 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          Rx(() => Text(t.count(homeVm.counter.value))),
+          Observe(() => Text(t.count(homeVm.counter.value))),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
@@ -155,10 +155,10 @@ class HomePage extends StatelessWidget {
             onPressed: () => showSnackBar("Hello from snakebar :snake:"),
             child: const Text("Show snackbar"),
           ),
-          Rx(
+          Observe(
             () => Text(t.count(homeVm.counter.value) + homeVm.mockValue.value),
           ),
-          Rx(
+          Observe(
             () => Text(
               "Count: ${homeVm.counter.value}, mock value is: ${homeVm.mockValue.value}",
             ),

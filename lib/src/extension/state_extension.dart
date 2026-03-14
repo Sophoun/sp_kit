@@ -246,6 +246,10 @@ void showSnackBar(String message) {
   );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/// Observer widget pattern
+////////////////////////////////////////////////////////////////////////////////
+
 /// Observer: it's for the type provider to Rx widget.
 abstract class Observer {
   void update();
@@ -256,16 +260,16 @@ class ObserverProxy {
   static Observer? proxy;
 }
 
-/// Reactive: It's a type that make the update happened when the value change
+/// ObserverValue: It's a type that make the update happened when the value change
 /// and register widget observer to listener via proxy.
-class Reactive<T> {
+class ObserverValue<T> {
   T _value;
   final Set<Observer> _listeners = {};
   final Set<Function(T value)> _updateListeners = {};
 
-  Reactive(this._value);
+  ObserverValue(this._value);
 
-  /// Read value from reactive and get listener from proxy to register.
+  /// Read value from observer and get listener from proxy to register.
   T get value {
     if (ObserverProxy.proxy != null) {
       _listeners.add(ObserverProxy.proxy!);
@@ -296,30 +300,30 @@ class Reactive<T> {
   }
 }
 
-/// Extend any value to reactive type
-extension ReactiveExtension<T> on T {
-  Reactive<T> get rx {
-    return Reactive<T>(this);
+/// Extend any value to observer value type
+extension AnyValueToObserverValueExtension<T> on T {
+  ObserverValue<T> get ob {
+    return ObserverValue<T>(this);
   }
 }
 
-/// Rx widget: work with reactive type. It's rebuild if the reactive value change.
-class Rx extends material.StatefulWidget {
-  const Rx(this.builder, {super.key});
+/// Observe widget: work with Observer value type. It's rebuild if the observer value change.
+class Observe extends material.StatefulWidget {
+  const Observe(this.builder, {super.key});
 
   final Widget Function() builder;
 
   @override
-  State<Rx> createState() => _RxState();
+  State<Observe> createState() => _ObserveState();
 }
 
-class _RxState extends material.State<Rx> implements Observer {
+class _ObserveState extends material.State<Observe> implements Observer {
   @override
   material.Widget build(material.BuildContext context) {
     ObserverProxy.proxy = this;
-    final notifierWidget = widget.builder();
+    final observeWidget = widget.builder();
     ObserverProxy.proxy = null;
-    return notifierWidget;
+    return observeWidget;
   }
 
   @override

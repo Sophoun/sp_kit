@@ -44,7 +44,7 @@ class SpTextFormField<T> extends StatefulWidget {
     );
   }
 
-  final Reactive<T> value;
+  final ObserverValue<T> value;
   final TextInputType keyboardType;
   InputDecoration? decoration;
   final Converter<T>? converter;
