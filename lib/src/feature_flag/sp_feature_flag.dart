@@ -1,68 +1,46 @@
 import 'package:flutter/widgets.dart' as w;
 import 'package:sp_kit/sp_kit.dart';
 
-/// Global feature flag
-/// It hold all values that registered from the [SpKit] widget.
-final w.ValueNotifier<Map<String, SpFlag>> featureFlagGlobally =
-    w.ValueNotifier({});
+/// Global feature flag notifier
+final w.ValueNotifier<Set<SpFlag>> featureFlagsGlobally = w.ValueNotifier({});
 
-/// Use this class to register feature flags.
-/// It hold the flags value and you can get it back by
-/// [SpFeatureFlag.getFeature] method.
-abstract class SpFeatureFlag {
-  abstract final Map<String, SpFlag> featureFlags;
+/// A static utility class to manage feature flags.
+class SpFeatureFlag {
+  // Prevent instantiation
+  SpFeatureFlag._();
 
-  SpFeatureFlag() {
-    updateFeatureFlags(featureFlags);
-  }
-
-  /// Clear existing feature flags and add new flags that provided.
-  /// You can call this method to update the feature flags any time.
-  /// But the widget tree must be rebuilt by yourself.
-  void updateFeatureFlags(Map<String, SpFlag> featureFlags) {
+  /// Register or merge new feature flags into the global state.
+  static void registerFlags(Set<SpFlag> flags) {
     log("Updating feature flags");
-    featureFlagGlobally.value = Map.from(featureFlags);
-    log("Feature flags updated");
-    for (var f in featureFlags.entries) {
-      log("Flag registered: ${f.key}, enabled: ${f.value.enabled}");
-    }
-    log(featureFlagGlobally.value.values.toSet().toString());
-  }
 
-  /// Get flag by name
-  static SpFlag getFeature(String featureKey) {
-    try {
-      final flag = featureFlagGlobally.value.entries
-          .firstWhere((f) => f.key == featureKey)
-          .value;
-      log("Flag found: $featureKey, enabled: ${flag.toString()}");
-      return flag;
-    } catch (e) {
-      throw Exception("Flag not found: $featureKey");
+    // Merge new flags with existing ones instead of completely overwriting
+    final updatedMap = Set<SpFlag>.from(flags);
+
+    featureFlagsGlobally.value = updatedMap;
+
+    for (var f in flags) {
+      log("Flag registered: ${f.key}, enabled: ${f.enabled}");
     }
   }
 
-  /// Get flag by type
-  static T getFeatureByType<T extends SpFlag>() {
-    try {
-      final flag = featureFlagGlobally.value.entries
-          .firstWhere((f) => f.value is T)
-          .value;
-      log("Flag found: ${flag.runtimeType}, enabled: ${flag.toString()}");
-      return flag as T;
-    } catch (e) {
-      throw Exception("Flag not found: ${T.toString()}");
-    }
-  }
-
-  /// Get all flags
-  void logFlags() {
-    log(
-      "Feature flags: $runtimeType, count: ${featureFlagGlobally.value.length}",
+  /// Get flag by string key (Optimized for direct Map lookup)
+  static SpFlag getFeature(String key) {
+    final flag = featureFlagsGlobally.value.firstWhere(
+      (e) => e.key == key,
+      orElse: () => throw Exception("Feature Flag not found: $key"),
     );
-    featureFlagGlobally.value.forEach((key, value) {
-      log("Flag: $key, enabled: ${value.enabled}");
-    });
+
+    log("Flag found: $key, enabled: ${flag.enabled}");
+    return flag;
+  }
+
+  /// Log all currently registered flags
+  static void logFlags() {
+    final flags = featureFlagsGlobally.value;
+    log("Feature flags count: ${flags.length}");
+    for (var f in flags) {
+      log("Flag: ${f.key}, enabled: ${f.enabled}");
+    }
     log("End of feature flags.");
   }
 }

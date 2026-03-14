@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:example/flags/static_feature_flag.dart';
 import 'package:example/lang/app_lang.dart';
 import 'package:example/vm/home_vm.dart';
 import 'package:flutter/material.dart';
@@ -169,7 +168,7 @@ class HomePage extends StatelessWidget {
             flagKey: 'new_version',
             on: Center(
               child: Text(
-                "New version available ${SpFeatureFlag.getFeatureByType<NewVersionFlag>().version}",
+                "New version available ${SpFeatureFlag.getFeature("new_version").description}",
                 style: context.textTheme?.bodyMedium?.copyWith(
                   color: Colors.green,
                 ),

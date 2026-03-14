@@ -2,12 +2,21 @@
 /// It hold the flags value and you can get it back by
 /// [SpFeatureFlag.getFeature] method.
 /// Or you can extend it to create your own feature flags.
-class SpFlag {
+class SpFlag<T> {
+  String key;
   bool enabled;
-  SpFlag(this.enabled);
+  String? description;
+  T? value;
+
+  SpFlag({
+    required this.key,
+    required this.enabled,
+    this.description,
+    this.value,
+  });
 
   @override
   String toString() {
-    return '$runtimeType(enabled: $enabled)';
+    return '$runtimeType(key: $key, enabled: $enabled, description: $description, value: $value)';
   }
 }

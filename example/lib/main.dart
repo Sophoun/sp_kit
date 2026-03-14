@@ -1,4 +1,3 @@
-import 'package:example/flags/static_feature_flag.dart';
 import 'package:example/lang/app_lang.dart';
 import 'package:example/lang/en.dart';
 import 'package:example/lang/kh.dart';
@@ -14,7 +13,11 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  MyApp({super.key}) {
+    SpFeatureFlag.registerFlags({
+      SpFlag(enabled: false, key: 'new_version', description: "v1.0.0-beta.1"),
+    });
+  }
 
   final appRouter = AppRouter();
   final diContainer = ServiceLocator()
@@ -22,13 +25,17 @@ class MyApp extends StatelessWidget {
     ..registerLazy((c) => MockService(mockNet: c.get<MockNet>()))
     ..register(HomeVm());
 
-  final featureFlag = StaticFeatureFlag();
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     Future.delayed(Duration(seconds: 3), () {
-      featureFlag.updateFeatureFlags({"new_version": NewVersionFlag(true)});
+      SpFeatureFlag.registerFlags({
+        SpFlag(
+          enabled: true,
+          key: 'new_version',
+          description: "v1.0.1-patch.1",
+        ),
+      });
       log("Feature flags updated");
     });
 
@@ -41,7 +48,6 @@ class MyApp extends StatelessWidget {
       routerConfig: appRouter.config(),
       themeMode: ThemeMode.dark,
       // messageDialogWidget: DialgOverride(),
-      featureFlag: featureFlag,
     );
   }
 }

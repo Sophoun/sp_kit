@@ -21,7 +21,7 @@ class SpFeatureGuard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: featureFlagGlobally,
+      valueListenable: featureFlagsGlobally,
       builder: (context, value, child) {
         final flag = SpFeatureFlag.getFeature(flagKey);
         log("Checking feature flag: $flagKey flag: $flag");
