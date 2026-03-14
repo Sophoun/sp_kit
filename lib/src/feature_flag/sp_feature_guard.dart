@@ -20,9 +20,9 @@ class SpFeatureGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    return featureFlagGlobally.builder(
-      build: (_) {
+    return ValueListenableBuilder(
+      valueListenable: featureFlagGlobally,
+      builder: (context, value, child) {
         final flag = SpFeatureFlag.getFeature(flagKey);
         log("Checking feature flag: $flagKey flag: $flag");
         return flag.enabled ? on : off ?? const SizedBox.shrink();

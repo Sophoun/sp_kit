@@ -8,10 +8,10 @@ A foundational library for Flutter applications, designed to streamline developm
 - **ViewModel Management:** A dedicated container for managing `ChangeNotifier` instances, effectively separating business logic from the UI.
 - **Localization:** An intuitive system for implementing multi-language support, allowing for easy registration and switching of languages.
 - **Responsive UI:** Built-in support for creating responsive user interfaces that adapt to different screen sizes using `ScreenUtil`.
-- **Utility Extensions:** A rich set of extensions for `BuildContext`, `ValueNotifier`, and more, to write cleaner and more concise code.
+- **Utility Extensions:** A rich set of extensions for `BuildContext`, `ObserverValue` (`.ob`), and more, to write cleaner and more concise code.
 - **Simplified Preferences:** Easy access to `SharedPreferences` for persistent key-value storage.
 - **Built-in Dialogs & Toasts:** Quickly display common UI elements like alerts and toasts with minimal code.
-- **`ValueNotifierWithListener`**: A `ValueNotifier` that triggers a callback when its value changes.
+- **Observer Pattern:** A reactive system using `ObserverValue` and the `Observe` widget for automatic UI updates.
 
 ## Public API
 
@@ -32,11 +32,11 @@ This library exposes a range of modules to streamline your Flutter development. 
 - **`debouncer.dart`**: A class for debouncing function calls.
 - **`event_bus.dart`**: A simple event bus for communication between different parts of your app.
 - **`logger.dart`**: A logging utility that only prints in debug mode.
-- **`sp_text_form_field.dart`**: A `TextFormField` that integrates with `ValueNotifier`.
+- **`sp_text_form_field.dart`**: A `TextFormField` that integrates with `ObserverValue`.
 - **`message_dialog.dart`**: A widget for displaying message dialogs.
 - **`responsive.dart`**: The `ResponsiveLayout` widget for building responsive UIs.
 - **`skeleton.dart`**: A widget for showing a skeleton loading animation.
-- **`value_notifier_with_listener.dart`**: A `ValueNotifier` with a built-in listener.
+- **`observer.dart`**: Core components for the Observer pattern.
 
 ## 🚀 Getting Started
 
@@ -200,19 +200,18 @@ late final mockService = inject<MockService>();
 
 ### 4. ViewModel
 
-Manage your UI state with `ChangeNotifier`.
+Manage your UI state with `ChangeNotifier` and `ObserverValue`.
 
 #### Create a ViewModel
 
 ```dart
 class HomeVm extends ChangeNotifier {
   late final _mockService = inject<MockService>();
-  final counter = ValueNotifier(0);
-  final title = ValueNotifier<String>("Home");
+  final counter = 0.ob;
+  final title = "Home".ob;
 
   void increment() {
     counter.value++;
-    // notifyListeners() is not needed for ValueNotifier updates
   }
 }
 ```
@@ -223,28 +222,19 @@ class HomeVm extends ChangeNotifier {
 // In your widget:
 final homeVm = getVm<HomeVm>();
 
-// Use the ValueNotifier.builder extension for efficient UI updates
-homeVm.counter.builder(
-  build: (value) => Text(t.count(value ?? 0)),
-)
+// Use the Observe widget for reactive UI updates
+Observe(() => Text(t.count(homeVm.counter.value)))
 ```
 
-#### GroupValueNotifierAsWidgetBuilder
+#### Reactive UI with Multiple Observables
 
-Listen to multiple notifiers from the same `ViewModel` and rebuild the UI when any of them changes.
+The `Observe` widget automatically tracks any `ObserverValue` accessed within its builder and rebuilds when any of them changes.
 
 ```dart
 // In your widget:
 final homeVm = getVm<HomeVm>();
 
-// Listen to multiple notifiers from the same ViewModel
-[homeVm.counter, homeVm.title].builder(
-  build: (values) {
-    final count = values[0] as int;
-    final title = values[1] as String;
-    return Text('$title: $count');
-  },
-)
+Observe(() => Text('${homeVm.title.value}: ${homeVm.counter.value}'))
 ```
 
 ### 5. Utility Extensions
@@ -919,14 +909,14 @@ TextFormField(
 
 ## SpTextFormField
 
-The `SpTextFormField` is a wrapper around `TextFormField` that simplifies its usage with a `ValueNotifier`. It automatically handles the `TextEditingController` and keeps the `ValueNotifier` in sync with the input.
+The `SpTextFormField` is a wrapper around `TextFormField` that simplifies its usage with an `ObserverValue`. It automatically handles the `TextEditingController` and keeps the `ObserverValue` in sync with the input.
 
 ### Usage
 
 ```dart
 import 'package:sp_kit/src/widgets/sp_text_form_field.dart';
 
-final myValue = ValueNotifier<String>("");
+final myValue = "".ob;
 
 SpTextFormField<String>(
   value: myValue,
@@ -937,12 +927,12 @@ SpTextFormField<String>(
 
 ### With Converter
 
-If you want to use a `ValueNotifier` with a type other than `String`, you can provide a `Converter`.
+If you want to use an `ObserverValue` with a type other than `String`, you can provide a `Converter`.
 
 ```dart
 import 'package:sp_kit/src/widgets/sp_text_form_field.dart';
 
-final myValue = ValueNotifier<int>(0);
+final myValue = 0.ob;
 
 SpTextFormField<int>(
   value: myValue,
@@ -1021,16 +1011,18 @@ void myFunction() {
 }
 ```
 
-## ValueNotifierWithListener
+## ObserverValue with Manual Listener
 
-The `ValueNotifierWithListener` is a `ValueNotifier` that triggers a callback function whenever its value changes. This is useful for scenarios where you need to react to value changes without manually adding and removing listeners.
+You can add a manual listener to an `ObserverValue` if you need to perform an action whenever its value changes, outside of the UI.
 
 ### Usage
 
 ```dart
 import 'package:sp_kit/sp_kit.dart';
 
-final counter = ValueNotifierWithListener<int>(0, (value) {
+final counter = 0.ob;
+
+counter.addListener((value) {
   print("Counter changed to: $value");
 });
 

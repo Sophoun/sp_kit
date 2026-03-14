@@ -131,7 +131,7 @@ class HomePage extends StatelessWidget {
               selectAllOnFocus: true,
             ),
           ),
-          homeVm.mockValue.builder(build: (value) => Text(value)),
+          Observe(() => Text(homeVm.mockValue.value)),
           ElevatedButton(
             onPressed: () => homeVm.getMockData(),
             child: const Text("Get Mock Data"),
@@ -160,7 +160,7 @@ class HomePage extends StatelessWidget {
           ),
           Observe(
             () => Text(
-              "Count: ${homeVm.counter.value}, mock value is: ${homeVm.mockValue.value}",
+              "Count: ${homeVm.counter.value}, mock value is: ${homeVm.mockValue.toOb.value}",
             ),
           ),
           Skeleton.circular(width: 100, height: 100),
