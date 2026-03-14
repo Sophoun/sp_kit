@@ -57,7 +57,7 @@ class MessageDialog extends StatelessWidget {
                     children: [buttonOk(context)],
                   )
                 // Show as OK and Cancel
-                else if (messageDialogData?.type == MessageDialogType.okCanncel)
+                else if (messageDialogData?.type == MessageDialogType.okCancel)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     spacing: 8,

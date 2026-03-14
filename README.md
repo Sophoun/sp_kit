@@ -17,10 +17,10 @@ A foundational library for Flutter applications, designed to streamline developm
 
 This library exposes a range of modules to streamline your Flutter development. Here is a list of the public APIs exported from `sp_kit`:
 
-- **`sp_kit.dart`**: The main entry point of the library, providing the `FlutterBase` root widget.
+- **`sp_kit.dart`**: The main entry point of the library, providing the `SpKit` root widget.
 - **`app_localize.dart` & `locale_register.dart`**: Core components for the localization system.
 - **`service_locator.dart`**: The dependency injection container.
-- **`state_extension.dart`**: Extensions for state management, including `getVm`, the `isAppLoading` notifier, and the **Observer pattern** (`Observe`, `ObserverValue`).
+- **`state_extension.dart`**: Extensions for state management, including `inject`, `getVm`, the `isAppLoading` notifier, and the **Observer pattern** (`Observe`, `ObserverValue`).
 - **`screen_extension.dart`**: Extensions for creating responsive UI with `ScreenUtil`.
 - **`spacing_extension.dart`**: Extensions for simplified padding and spacing.
 - **`number_extension.dart`**: Extensions for number formatting and checking null/zero values.
@@ -36,7 +36,7 @@ This library exposes a range of modules to streamline your Flutter development. 
 - **`message_dialog.dart`**: A widget for displaying message dialogs.
 - **`responsive.dart`**: The `ResponsiveLayout` widget for building responsive UIs.
 - **`skeleton.dart`**: A widget for showing a skeleton loading animation.
-- **`observer.dart`**: Core components for the Observer pattern.
+- **`observe_widget.dart`**: Core components for the Observer pattern.
 
 ## 🚀 Getting Started
 
@@ -61,11 +61,13 @@ dependencies:
 
 Then, run `flutter pub get` to install the package.
 
-## usage
+## Usage
 
-### 1. Root Widget Setup (`FlutterBase`)
+### 1. Root Widget Setup (`SpKit`)
 
-Wrap your root widget with `FlutterBase` to provide the necessary containers (`ServiceLocator`, `LocaleRegister`) and screen utility initialization to the entire widget tree.
+Use the `SpKit` widget as your root widget to provide the necessary containers (`ServiceLocator`, `LocaleRegister`) and screen utility initialization to the entire widget tree. `SpKit` internally manages the `MaterialApp` or `MaterialApp.router`.
+
+#### Option A: Using `MaterialApp.router` (Recommended)
 
 ```dart
 import 'package:flutter/material.dart';
@@ -88,25 +90,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlutterBase(
+    return SpKit(
       // (Optional) Set the design size for responsive UI
       designSize: const Size(360, 690),
-      // (Optional) Set the maximum screen size of your app.
-      screenSize: const Size(360, 690),
-
+      
       // Register your dependencies
       serviceLocator: setupServiceLocator(),
 
       // Configure localization
       locale: setupLocale(),
 
-      child: MaterialApp.router(
-        routerConfig: _appRouter.config(),
-        title: 'SP Kit Example',
-      ),
+      // Pass router configuration
+      routerConfig: _appRouter.config(),
     );
   }
 }
+```
+
+#### Option B: Using standard `MaterialApp` (with `body`)
+
+```dart
+    return SpKit(
+      serviceLocator: setupServiceLocator(),
+      locale: setupLocale(),
+      body: const MyHomePage(),
+    );
 ```
 
 ### 2. Localization
@@ -162,7 +170,7 @@ class Kh extends AppLang {
 
 #### Register and Use Translations
 
-Register your languages in the `FlutterBase` widget and access them in your UI.
+Register your languages in the `SpKit` widget and access them in your UI.
 
 ```dart
 // Setup locale
@@ -220,7 +228,7 @@ class HomeVm extends ChangeNotifier {
 
 ```dart
 // In your widget:
-final homeVm = getVm<HomeVm>();
+final homeVm = inject<HomeVm>(); // or getVm<HomeVm>()
 
 // Use the Observe widget for reactive UI updates
 Observe(() => Text(t.count(homeVm.counter.value)))
@@ -232,7 +240,7 @@ The `Observe` widget automatically tracks any `ObserverValue` accessed within it
 
 ```dart
 // In your widget:
-final homeVm = getVm<HomeVm>();
+final homeVm = inject<HomeVm>();
 
 Observe(() => Text('${homeVm.title.value}: ${homeVm.counter.value}'))
 ```
@@ -244,7 +252,7 @@ Observe(() => Text('${homeVm.title.value}: ${homeVm.counter.value}'))
 Design your UI for a specific screen size, and it will scale automatically.
 
 ```dart
-// Initialize in FlutterBase
+// Initialize in SpKit
 // designSize: const Size(360, 690),
 
 // Use in widgets
@@ -500,16 +508,14 @@ class MyCustomDialog extends MessageDialog {
 }
 ```
 
-Then, pass your custom dialog to the `FlutterBase` widget in your `main.dart` file:
+Then, pass your custom dialog to the `SpKit` widget in your `main.dart` file:
 
 ```dart
 // In your main application setup
-FlutterBase(
+SpKit(
   // ...
   messageDialogWidget: MyCustomDialog(),
-  child: MaterialApp.router(
-    // ...
-  ),
+  // ...
 );
 ```
 
@@ -521,10 +527,10 @@ Simplify spacing and padding with intuitive extensions on `num`.
 
 ```dart
 // Add vertical space
-16.h,
+16.height,
 
 // Add horizontal space
-16.w,
+16.width,
 
 // Apply padding on all sides
 Container(
@@ -541,7 +547,7 @@ Container(
 // Apply vertical padding
 Container(
   padding: 16.paddingVertical,
-n  child: const Text("Padded Content"),
+  child: const Text("Padded Content"),
 );
 
 // Apply padding to a single side
@@ -587,28 +593,11 @@ print(nullNumber.toStringAsFixedSafe(2)); // 0
 
 ### 8. Responsive Layouts (Mobile & Tablet)
 
-The library includes a powerful `ResponsiveLayout` widget that works with the `FlutterBase` configuration to render different widgets for mobile, tablet, and desktop layouts. It can also enforce a specific aspect ratio for mobile and tablet views, ensuring your layouts look consistent.
-
-#### Configure Aspect Ratios
-
-In your `FlutterBase` widget, you can optionally provide `mobileAspectRatio` and `tabletAspectRatio`.
-
-```dart
-// In your main application setup
-FlutterBase(
-  // Default is 9 / 16
-  mobileAspectRatio: 9 / 16,
-
-  // Default is 4 / 3
-  tabletAspectRatio: 4 / 3,
-
-  child: MyApp(),
-);
-```
+The library includes a powerful `ResponsiveLayout` widget that supports different widgets for mobile, tablet, and desktop layouts.
 
 #### Use the `ResponsiveLayout` Widget
 
-Use the `ResponsiveLayout` widget to build different UI for different screen sizes. The widget automatically applies the configured aspect ratio for mobile and tablet layouts.
+Use the `ResponsiveLayout` widget to build different UI for different screen sizes.
 
 ```dart
 import 'package:sp_kit/sp_kit.dart';
@@ -630,7 +619,6 @@ class MyPage extends StatelessWidget {
 class MobileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // This view will be constrained to the mobileAspectRatio
     return Container(color: Colors.red, child: Center(child: Text("Mobile")));
   }
 }
@@ -638,7 +626,6 @@ class MobileView extends StatelessWidget {
 class TabletView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // This view will be constrained to the tabletAspectRatio
     return Container(color: Colors.green, child: Center(child: Text("Tablet")));
   }
 }
@@ -646,7 +633,6 @@ class TabletView extends StatelessWidget {
 class DesktopView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Desktop view does not have an aspect ratio applied by default
     return Container(color: Colors.blue, child: Center(child: Text("Desktop")));
   }
 }
@@ -724,10 +710,9 @@ import 'package:sp_kit/sp_kit.dart';
 import 'package:flutter/material.dart';
 
 // Assuming you have an SVG asset at 'assets/icons/my_icon.svg'
-Widget mySvgIcon = 'assets/icons/my_icon.svg'.toImage(width: 24, height: 24, color: Colors.blue);
+Widget mySvgIcon = 'assets/icons/my_icon.svg'.toImage(width: 24, height: 24);
 
 // You can use it directly in your widget tree
-// SvgPicture.asset is automatically handled.
 Scaffold(
   appBar: AppBar(
     title: Text("SVG Image Example"),
@@ -818,7 +803,7 @@ The default theme uses a `RoundedRectangleBorder` with a radius of 8 for all sha
 
 ### Customization
 
-To customize the theme, you can create your own `ThemeData` objects and pass them to the `FlutterBase` in your `App` widget. You can use the `SpTheme` as a starting point by copying it and modifying it.
+To customize the theme, you can create your own `ThemeData` objects and pass them to the `SpKit` widget.
 
 For example, you can create a `my_theme.dart` file in your project:
 
@@ -828,7 +813,7 @@ import 'package:flutter/material.dart';
 import 'package:sp_kit/sp_kit.dart';
 
 class MyTheme {
-  static final light = Spheme.light.copyWith(
+  static final light = SpTheme.light.copyWith(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
   );
 
@@ -838,83 +823,40 @@ class MyTheme {
 }
 ```
 
-Then, in your `MyApp` widget, you can use your custom theme:
+Then, in your `SpKit` setup:
 
 ```dart
-// In your main application setup
-class MyApp extends StatelessWidget {
+SpKit(
   // ...
-  @override
-  Widget build(BuildContext context) {
-    return FlutterBase(
-      // ...
-      child: MaterialApp.router(
-        theme: MyTheme.light,
-        darkTheme: MyTheme.dark,
-        themeMode: ThemeMode.system, // Or any other theme mode
-        routerConfig: _appRouter.config(),
-        title: 'SP Kit Example',
-      ),
-    );
-  }
-}
+  theme: MyTheme.light,
+  darkTheme: MyTheme.dark,
+  themeMode: ThemeMode.system,
+  // ...
+);
 ```
 
 ## Form Validation
 
-The `sp_kit` package includes a `Validators` class with a comprehensive set of static methods for form validation. These validators can be used with `TextFormField` and other form fields in Flutter.
+The `sp_kit` package includes a `Validators` class with a comprehensive set of static methods for form validation.
 
 ### Usage
 
-To use the validators, simply import the `validators.dart` file and call the desired validation method in the `validators` property of your form field.
-
 ```dart
-import 'package:sp_kit/src/commons/validators.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 TextFormField(
   validator: (value) => Validators.required(value, message: 'Please enter a value'),
 )
 ```
 
-### Available Validators
-
-| Method                                                                     | Description                                                          |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `required(String? value, {String? message})`                               | Checks if the value is not null and not empty.                       |
-| `minLength(String? value, int minLength, {String? message})`               | Checks if the value has at least `minLength` characters.             |
-| `maxLength(String? value, int maxLength, {String? message})`               | Checks if the value has at most `maxLength` characters.              |
-| `email(String? value, {String? message})`                                  | Checks if the value is a valid email address.                        |
-| `password(String? value, {String? message})`                               | Checks if the value is a valid password (at least 6 characters).     |
-| `number(String? value, {String? message})`                                 | Checks if the value is a valid number.                               |
-| `url(String? value, {String? message})`                                    | Checks if the value is a valid URL.                                  |
-| `phone(String? value, {String? message})`                                  | Checks if the value is a valid phone number (10 digits).             |
-| `date(String? value, {String? message})`                                   | Checks if the value is a valid date.                                 |
-| `compare(String? value, String? otherValue, {required String message})`    | Checks if the value is the same as `otherValue`.                     |
-| `notEmpty(String? value, {String? message})`                               | Checks if the value is not empty (trims whitespace).                 |
-| `minValue(String? value, int minValue, {String? message})`                 | Checks if the value is a number greater than or equal to `minValue`. |
-| `maxValue(String? value, int maxValue, {String? message})`                 | Checks if the value is a number less than or equal to `maxValue`.    |
-| `creditCard(String? value, {String? message})`                             | Checks if the value is a valid credit card number.                   |
-| `ipAddress(String? value, {String? message})`                              | Checks if the value is a valid IP address.                           |
-| `slug(String? value, {String? message})`                                   | Checks if the value is a valid slug.                                 |
-| `alpha(String? value, {String? message})`                                  | Checks if the value contains only alphabetic characters.             |
-| `alphanumeric(String? value, {String? message})`                           | Checks if the value contains only alphanumeric characters.           |
-| `isJson(String? value, {String? message})`                                 | Checks if the value is a valid JSON string.                          |
-| `isJwt(String? value, {String? message})`                                  | Checks if the value is a valid JWT.                                  |
-| `inList(String? value, List<String> list, {String? message})`              | Checks if the value is in the given list.                            |
-| `notInList(String? value, List<String> list, {String? message})`           | Checks if the value is not in the given list.                        |
-| `fileExtension(String? value, List<String> extensions, {String? message})` | Checks if the value is a valid file extension.                       |
-| `creditCardExpirationDate(String? value, {String? message})`               | Checks if the value is a valid credit card expiration date.          |
-| `cvv(String? value, {String? message})`                                    | Checks if the value is a valid CVV.                                  |
-| `isbn(String? value, {String? message})`                                   | Checks if the value is a valid ISBN.                                 |
-
 ## SpTextFormField
 
-The `SpTextFormField` is a wrapper around `TextFormField` that simplifies its usage with an `ObserverValue`. It automatically handles the `TextEditingController` and keeps the `ObserverValue` in sync with the input.
+The `SpTextFormField` is a wrapper around `TextFormField` that simplifies its usage with an `ObserverValue`.
 
 ### Usage
 
 ```dart
-import 'package:sp_kit/src/widgets/sp_text_form_field.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 final myValue = "".ob;
 
@@ -925,34 +867,14 @@ SpTextFormField<String>(
 );
 ```
 
-### With Converter
-
-If you want to use an `ObserverValue` with a type other than `String`, you can provide a `Converter`.
-
-```dart
-import 'package:sp_kit/src/widgets/sp_text_form_field.dart';
-
-final myValue = 0.ob;
-
-SpTextFormField<int>(
-  value: myValue,
-  label: "My Value",
-  hint: "Enter a number",
-  converter: Converter<int>(
-    fromValue: (value) => value.toString(),
-    toValue: (value) => int.tryParse(value ?? '0') ?? 0,
-  ),
-);
-```
-
 ## Debouncer
 
-The `Debouncer` class helps to delay the execution of a function. This is useful for scenarios like search fields, where you want to wait for the user to stop typing before performing a search.
+The `Debouncer` class helps to delay the execution of a function.
 
 ### Usage
 
 ```dart
-import 'package:sp_kit/src/commons/debouncer.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 final _debouncer = Debouncer(delay: Duration(milliseconds: 500));
 
@@ -965,14 +887,14 @@ void onSearchChanged(String query) {
 
 ## EventBus
 
-The `EventBus` provides a way for different parts of your application to communicate with each other without having direct references.
+The `EventBus` provides a way for different parts of your application to communicate with each other.
 
 ### Usage
 
 #### Registering Events
 
 ```dart
-import 'package:sp_kit/src/commons/event_bus.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 void onEvent(int id, dynamic data) {
   print("Received event with id: $id and data: $data");
@@ -984,7 +906,7 @@ EventBus.register([1, 2], onEvent);
 #### Firing Events
 
 ```dart
-import 'package:sp_kit/src/commons/event_bus.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 EventBus.fire(1, data: "Hello from EventBus!");
 ```
@@ -992,7 +914,7 @@ EventBus.fire(1, data: "Hello from EventBus!");
 #### Unregistering Events
 
 ```dart
-import 'package:sp_kit/src/commons/event_bus.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 EventBus.unregister([1, 2]);
 ```
@@ -1004,7 +926,7 @@ The `log` function is a simple utility that prints messages to the console only 
 ### Usage
 
 ```dart
-import 'package:sp_kit/src/commons/logger.dart';
+import 'package:sp_kit/sp_kit.dart';
 
 void myFunction() {
   log("This is a debug message");
@@ -1013,7 +935,7 @@ void myFunction() {
 
 ## ObserverValue with Manual Listener
 
-You can add a manual listener to an `ObserverValue` if you need to perform an action whenever its value changes, outside of the UI.
+You can add a manual listener to an `ObserverValue`.
 
 ### Usage
 
@@ -1026,120 +948,20 @@ counter.addListener((value) {
   print("Counter changed to: $value");
 });
 
-// To change the value and trigger the callback
-counter.value = 1; // This will print "Counter changed to: 1"
+counter.value = 1;
 ```
 
 ### 12. Feature Flag
 
-The `sp_kit` package includes a reactive feature flag system that allows you to dynamically enable or disable features in your application. When you update a feature flag, any widgets that depend on it will automatically rebuild. This is useful for A/B testing, rolling out new features gradually, or hiding unfinished features.
+The `sp_kit` package includes a reactive feature flag system.
 
 #### Core Concepts
 
-- **`SpFeatureFlag`**: An abstract class that holds the feature flags for your application. You should extend this class to define your own feature flags.
-- **`SpFlag`**: A class that represents a single feature flag. It contains a boolean `enabled` property. You can extend this class to add more properties to your feature flags.
-- **`SpFeatureGuard`**: A widget that conditionally shows or hides its child based on a feature flag. It automatically rebuilds when the flag's value changes.
-
-#### Static Feature Flags
-
-Static feature flags are defined in your code.
-
-##### Example
-
-First, define your feature flags by extending `SpFlag`:
-
-```dart
-// lib/flags/my_feature_flags.dart
-import 'package:sp_kit/sp_kit.dart';
-
-class NewVersionFlag extends SpFlag {
-  NewVersionFlag(super.enabled);
-  final String version = "1.0.1-pro";
-}
-```
-
-Next, create a class that extends `SpFeatureFlag` and register your flags:
-
-```dart
-// lib/flags/my_feature_flags.dart
-class StaticFeatureFlag extends SpFeatureFlag {
-  @override
-  Map<String, SpFlag> get featureFlags => {
-    'new_version': NewVersionFlag(false),
-  };
-}
-```
-
-Finally, register your feature flags in the `FlutterBase` widget:
-
-```dart
-// In your main application setup
-final featureFlag = StaticFeatureFlag();
-
-FlutterBase(
-  // ...
-  featureFlag: featureFlag,
-  child: MaterialApp.router(
-    // ...
-  ),
-);
-```
-
-#### Remote Feature Flags & Reactivity
-
-You can update feature flags at any time, and the UI will react automatically. This is useful for remote feature flags that are fetched from a server.
-
-##### Example
-
-Create a class that extends `SpFeatureFlag` and fetches the flags from a remote source:
-
-```dart
-// lib/flags/my_feature_flags.dart
-class RemoteFeatureFlag extends SpFeatureFlag {
-  @override
-  final Map<String, SpFlag> featureFlags = {};
-
-  Future<void> fetchFlags() async {
-    // Fetch flags from your remote source
-    final remoteFlags = await MyApiService.fetchFlags(); // This is a mock service
-
-    final flags = <String, SpFlag>{};
-    for (var flag in remoteFlags.entries) {
-      flags[flag.key] = SpFlag(flag.value);
-    }
-
-    // Update the flags
-    updateFeatureFlags(flags);
-  }
-}
-```
-
-Then, you can fetch the flags when your app starts or at any other time:
-
-```dart
-// In your main application setup
-final remoteFeatureFlag = RemoteFeatureFlag();
-await remoteFeatureFlag.fetchFlags();
-
-FlutterBase(
-  // ...
-  featureFlag: remoteFeatureFlag,
-  child: MaterialApp.router(
-    // ...
-  ),
-);
-
-// You can update the flags at any time
-Future.delayed(const Duration(seconds: 5), () {
-  remoteFeatureFlag.updateFeatureFlags({
-    'new_feature': SpFlag(true),
-  });
-});
-```
+- **`SpFeatureFlag`**: Abstract class for defining feature flags.
+- **`SpFlag`**: Represents a single feature flag.
+- **`SpFeatureGuard`**: Widget that shows/hides content based on a flag.
 
 #### Using `SpFeatureGuard`
-
-The `SpFeatureGuard` widget allows you to show or hide a widget based on a feature flag. It automatically rebuilds when the flag's value changes.
 
 ```dart
 import 'package:sp_kit/sp_kit.dart';
@@ -1151,100 +973,32 @@ SpFeatureGuard(
 )
 ```
 
-If the `new_version` flag is enabled, `MyNewWidget` will be shown. Otherwise, `MyOldWidget` will be shown. If `off` is not provided, nothing will be shown.
-
-#### Accessing Flag Values
-
-You can also access the flag values directly in your code:
-
-```dart
-import 'package:sp_kit/sp_kit.dart';
-
-final newVersionFlag = SpFeatureFlag.getFeature('new_version') as NewVersionFlag;
-print(newVersionFlag.version); // 1.0.1-pro
-```
-
 ### 13. Observer Pattern
 
-The Observer pattern provides a simple and reactive way to manage state. By using `ObserverValue` and the `Observe` widget, your UI automatically rebuilds whenever the underlying data changes, without the need for manual `addListener` or `notifyListeners()`.
-
-#### Core Components
-
-- **`.ob`**: An extension on any type to convert it into an `ObserverValue`.
-- **`Observe`**: A widget that tracks any `ObserverValue` accessed within its builder and rebuilds when they change.
+Reactive state management using `ObserverValue` and the `Observe` widget.
 
 #### Usage Example
 
 ```dart
 import 'package:sp_kit/sp_kit.dart';
 
-// Define observable values (e.g., in your ViewModel or Controller)
 final counter = 0.ob;
-final status = "Idle".ob;
 
-// In your Widget build method:
-Observe(() => Column(
-  children: [
-    Text("Status: ${status.value}"),
-    Text("Count: ${counter.value}"),
-    ElevatedButton(
-      onPressed: () {
-        counter.value++;
-        status.value = "Incrementing...";
-      },
-      child: const Text("Add"),
-    ),
-  ],
-))
+Observe(() => Text("Count: ${counter.value}"))
 ```
 
 ### 14. CLI Tools
 
-The `sp_kit` package includes a command-line interface (CLI) tool that provides utilities to streamline development workflows, such as creating new applications and adding features.
-
-To run `sp_kit` commands, use `dart run sp_kit:<command>`.
-
-### Global Options
-
-- `--help` or `-h`: Displays help information and available commands for the `sp_kit` CLI.
-
-  #### Usage
-
-  ```bash
-  dart run sp_kit --help
-  ```
-
-### `create_app`
-
-Creates a new Flutter application pre-configured with the `sp_kit` structure and best practices.
-
-#### Usage
+Utilities to streamline development workflows.
 
 ```bash
 dart run sp_kit:create_app --name <app_name>
-```
-
-Replace `<app_name>` with the desired name for your new Flutter project.
-
-### `feature_add`
-
-Adds a new feature module to an existing `sp_kit` application. This command helps scaffold the necessary files and directories for a new feature.
-
-#### Usage
-
-```bash
 dart run sp_kit:feature_add --name <feature_name>
 ```
 
-Replace `<feature_name>` with the name of the feature you want to add.
-
 ## Example Project
 
-The `example` directory contains a complete Flutter application demonstrating all the features of this library. To run it, navigate to the `example` folder and execute:
-
-```bash
-flutter run
-```
+The `example` directory contains a complete Flutter application demonstrating all the features of this library.
 
 ## 📄 License
 

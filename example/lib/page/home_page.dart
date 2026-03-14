@@ -138,7 +138,7 @@ class HomePage extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () => showMessage(
-              type: MessageDialogType.okCanncel,
+              type: MessageDialogType.okCancel,
               title: "Welcome, to my longest title dialog",
               message:
                   "This is my longest Hello world, Hello world, Hello world, Hello world Hello world!",

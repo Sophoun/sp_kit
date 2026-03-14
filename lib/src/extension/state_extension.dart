@@ -23,18 +23,22 @@ extension PostLoadingExtension on ChangeNotifier {
 ///
 extension StatelessExtension on StatelessWidget {
   T inject<T>() => ServiceLocator().get<T>();
+  T getVm<T>() => ServiceLocator().get<T>();
 }
 
 extension StatefulExtension on StatefulWidget {
   T inject<T>() => ServiceLocator().get<T>();
+  T getVm<T>() => ServiceLocator().get<T>();
 }
 
 extension StateExtension on State {
   T inject<T>() => ServiceLocator().get<T>();
+  T getVm<T>() => ServiceLocator().get<T>();
 }
 
 extension ChangeNotifierExtension on ChangeNotifier {
   T inject<T>() => ServiceLocator().get<T>();
+  T getVm<T>() => ServiceLocator().get<T>();
 }
 
 /// Language extension
@@ -60,7 +64,7 @@ class MessageDialogData {
   const MessageDialogData({
     this.title,
     this.message,
-    this.type = MessageDialogType.okCanncel,
+    this.type = MessageDialogType.okCancel,
     this.onOk,
     this.onCancel,
     this.okText = "Ok",
@@ -69,7 +73,7 @@ class MessageDialogData {
 }
 
 /// Message dialog type, to distingue between dialog style
-enum MessageDialogType { ok, okCanncel, toast }
+enum MessageDialogType { ok, okCancel, toast }
 
 /// Show message dialog
 void showMessage({
