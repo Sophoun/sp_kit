@@ -3,6 +3,7 @@ import 'package:sp_kit/sp_kit.dart';
 import 'package:sp_kit/src/connectivity/connectivity_service.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';
 import 'package:sp_kit/src/widgets/loading_indicator.dart';
+import 'package:sp_kit/src/widgets/no_internet_dialog.dart';
 
 // ignore: must_be_immutable
 class SpKit extends StatelessWidget {
@@ -174,16 +175,16 @@ class _BuildLocalizeState extends State<_BuildLocalize> {
                     ),
 
                     /// Internet state
-                    // StreamBuilder(
-                    //   stream: ConnectivityService.instance().statusStream,
-                    //   initialData: true,
-                    //   builder: (context, snapshot) {
-                    //     return Visibility(
-                    //       visible: snapshot.requireData,
-                    //       child: const LoadingIndicator(),
-                    //     );
-                    //   },
-                    // ),
+                    StreamBuilder(
+                      stream: ConnectivityService.instance().statusStream,
+                      initialData: true,
+                      builder: (context, snapshot) {
+                        return Visibility(
+                          visible: !snapshot.requireData,
+                          child: NoInternetDialog(),
+                        );
+                      },
+                    ),
 
                     /// Loading dialog
                     Visibility(
