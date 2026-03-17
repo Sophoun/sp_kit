@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sp_kit/sp_kit.dart';
+import 'package:sp_kit/src/connectivity/connectivity_service.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';
 import 'package:sp_kit/src/widgets/loading_indicator.dart';
 
@@ -107,7 +108,7 @@ class SpKit extends StatelessWidget {
 }
 
 /// Build localize
-class _BuildLocalize extends StatelessWidget {
+class _BuildLocalize extends StatefulWidget {
   const _BuildLocalize({
     this.locale,
     this.child,
@@ -121,6 +122,23 @@ class _BuildLocalize extends StatelessWidget {
   final Widget loadingWidget;
 
   @override
+  State<_BuildLocalize> createState() => _BuildLocalizeState();
+}
+
+class _BuildLocalizeState extends State<_BuildLocalize> {
+  @override
+  void initState() {
+    super.initState();
+    ConnectivityService.instance().initialize();
+  }
+
+  @override
+  void dispose() {
+    ConnectivityService.instance().dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: isAppLoading,
@@ -129,17 +147,19 @@ class _BuildLocalize extends StatelessWidget {
           stream: messageDialog.stream,
           builder: (context, snapshot) {
             final isDialogVisible = snapshot.data?.key == true;
-            final message = messageDialogWidget ?? MessageDialog();
+            final message = widget.messageDialogWidget ?? MessageDialog();
             message.setData(snapshot.data?.value);
 
             return PopScope(
               canPop: !isLoading && !isDialogVisible,
               child: LocalizeInherited(
-                register: locale!,
+                register: widget.locale!,
                 child: Stack(
                   textDirection: TextDirection.rtl,
                   children: [
-                    child ?? const SizedBox.shrink(),
+                    widget.child ?? const SizedBox.shrink(),
+
+                    /// General dialog
                     Visibility(
                       key: UniqueKey(),
                       visible: isDialogVisible,
@@ -152,12 +172,26 @@ class _BuildLocalize extends StatelessWidget {
                         ),
                       ),
                     ),
+
+                    /// Internet state
+                    // StreamBuilder(
+                    //   stream: ConnectivityService.instance().statusStream,
+                    //   initialData: true,
+                    //   builder: (context, snapshot) {
+                    //     return Visibility(
+                    //       visible: snapshot.requireData,
+                    //       child: const LoadingIndicator(),
+                    //     );
+                    //   },
+                    // ),
+
+                    /// Loading dialog
                     Visibility(
                       visible: isLoading,
                       child: PopScope(
                         canPop: false,
                         onPopInvokedWithResult: (didPop, result) => false,
-                        child: loadingWidget,
+                        child: widget.loadingWidget,
                       ),
                     ),
                   ],
