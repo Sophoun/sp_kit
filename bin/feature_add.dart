@@ -46,7 +46,7 @@ void addFeature(String name) {
     create: true,
   ).write(featurePage(className));
   touch(
-    "lib/view_models/${pathName}_vm.dart",
+    "lib/features/$pathName/${pathName}_vm.dart",
     create: true,
   ).write(viewModel(className));
 
