@@ -32,6 +32,9 @@ export 'src/commons/logger.dart';
 export 'src/commons/value_notifier_with_listener.dart';
 export 'src/commons/observe_widget.dart';
 
+/// Connectivity
+export 'src/connectivity/connectivity_service.dart';
+
 /// Widgets
 export 'src/widgets/sp_text_form_field.dart';
 export 'src/widgets/message_dialog.dart';
