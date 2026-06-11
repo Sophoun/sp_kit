@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sp_kit/sp_kit.dart';
-import 'package:sp_kit/src/connectivity/connectivity_service.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';
 import 'package:sp_kit/src/widgets/loading_indicator.dart';
 import 'package:sp_kit/src/widgets/no_internet_dialog.dart';
@@ -24,6 +23,7 @@ class SpKit extends StatelessWidget {
     this.themeMode,
     this.body,
     this.localizationsDelegates,
+    this.useConnectivityService = true,
   }) {
     /// Assign theme if it's missing
     theme ??= SpTheme.light;
@@ -66,6 +66,9 @@ class SpKit extends StatelessWidget {
   late ThemeMode? themeMode;
   List<LocalizationsDelegate<dynamic>>? localizationsDelegates;
 
+  /// Connectivity
+  final bool useConnectivityService;
+
   final Widget? body;
 
   @override
@@ -82,6 +85,7 @@ class SpKit extends StatelessWidget {
               locale: locale,
               messageDialogWidget: messageDialogWidget,
               loadingWidget: loadingWidget,
+              useConnectivityService: useConnectivityService,
               child: child,
             ),
             localizationsDelegates: localizationsDelegates,
@@ -102,6 +106,7 @@ class SpKit extends StatelessWidget {
               locale: locale,
               messageDialogWidget: messageDialogWidget,
               loadingWidget: loadingWidget,
+              useConnectivityService: useConnectivityService,
               child: child,
             ),
           );
@@ -115,12 +120,14 @@ class _BuildLocalize extends StatefulWidget {
     this.child,
     this.messageDialogWidget,
     required this.loadingWidget,
+    required this.useConnectivityService,
   });
 
   final LocaleRegister<AppLocalize>? locale;
   final Widget? child;
   final MessageDialog? messageDialogWidget;
   final Widget loadingWidget;
+  final bool useConnectivityService;
 
   @override
   State<_BuildLocalize> createState() => _BuildLocalizeState();
@@ -175,16 +182,17 @@ class _BuildLocalizeState extends State<_BuildLocalize> {
                     ),
 
                     /// Internet state
-                    StreamBuilder(
-                      stream: ConnectivityService.instance().statusStream,
-                      initialData: true,
-                      builder: (context, snapshot) {
-                        return Visibility(
-                          visible: !snapshot.requireData,
-                          child: NoInternetDialog(),
-                        );
-                      },
-                    ),
+                    if (widget.useConnectivityService)
+                      StreamBuilder(
+                        stream: ConnectivityService.instance().statusStream,
+                        initialData: true,
+                        builder: (context, snapshot) {
+                          return Visibility(
+                            visible: !snapshot.requireData,
+                            child: NoInternetDialog(),
+                          );
+                        },
+                      ),
 
                     /// Loading dialog
                     Visibility(
