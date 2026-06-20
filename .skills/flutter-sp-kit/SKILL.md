@@ -1,8 +1,6 @@
 ---
 name: flutter-sp-kit
 description: Best practices for sp_kit — a Flutter foundation library providing dependency injection, reactive state management (ObserverValue/Observe), localization, responsive UI, feature flags, Either-based error handling, and utility extensions.
-metadata:
-  origin: custom
 ---
 
 # Flutter sp_kit Best Practices
@@ -49,6 +47,7 @@ class MyApp extends StatelessWidget {
 ```
 
 **Best Practices**:
+
 - Call `Pref.init()` before `runApp()` if accessing preferences in `main()`
 - Use `routerConfig` for auto_route integration (recommended over `body`)
 - Set `designSize` to match your Figma/design tool dimensions
@@ -70,6 +69,7 @@ ServiceLocator setupServiceLocator() {
 ```
 
 **Best Practices**:
+
 - Use `register()` for singletons that should be created immediately
 - Use `registerLazy()` for expensive objects or those with dependencies
 - Always pass dependencies via the factory callback parameter `c`
@@ -83,7 +83,7 @@ Use `inject<T>()` extension available on widgets, states, and ChangeNotifiers:
 ```dart
 class HomeVm extends ChangeNotifier {
   late final _repository = inject<UserRepository>();
-  
+
   void loadData() {
     _repository.fetchUsers();
   }
@@ -99,6 +99,7 @@ class HomePage extends StatelessWidget {
 ```
 
 **Best Practices**:
+
 - Use `late final` for injected dependencies in ViewModels
 - Prefer `inject<T>()` over `getVm<T>()` for consistency
 - Never create new instances of registered services manually
@@ -114,11 +115,11 @@ class HomeVm extends ChangeNotifier {
   final counter = 0.ob;
   final title = "Home".ob;
   final items = <String>[].ob;
-  
+
   void increment() {
     counter.value++;
   }
-  
+
   void updateTitle(String newTitle) {
     title.value = newTitle;
   }
@@ -144,6 +145,7 @@ Observe(() => Column(
 ```
 
 **Best Practices**:
+
 - Access `.value` inside `Observe` to auto-track dependencies
 - Keep `Observe` widgets small and focused — avoid wrapping entire screens
 - Multiple `ObserverValue` accesses in one `Observe` are all tracked
@@ -168,6 +170,7 @@ class HomeVm extends ChangeNotifier {
 ```
 
 **Best Practices**:
+
 - Always use `try/finally` to ensure `postLoading(false)` is called
 - The loading overlay is managed by `SpKit` — don't create your own
 - Use for long operations (>1 second) that block user interaction
@@ -207,6 +210,7 @@ Future<Either<Profile, EitherException>> getFullProfile() async {
 ```
 
 **Best Practices**:
+
 - Use `EitherException` with `code` and `message` for structured errors
 - Chain with `bind()` when each step depends on the previous success
 - Handle errors at the presentation layer with pattern matching
@@ -268,6 +272,7 @@ context.local.register.changeLang(Lang.km);
 ```
 
 **Best Practices**:
+
 - Define all translation keys in the abstract class
 - Use methods for dynamic values: `String itemCount(int count)`
 - Access translations via `context.t<AppLang>()` — never hardcode strings
@@ -304,6 +309,7 @@ ResponsiveLayout(
 ```
 
 **Best Practices**:
+
 - Use `.w` for widths and horizontal padding
 - Use `.h` for heights and vertical spacing
 - Use `.sp` for font sizes
@@ -349,6 +355,7 @@ if (flag.enabled) {
 ```
 
 **Best Practices**:
+
 - Register all flags at app startup in `main()`
 - Use `SpFeatureGuard` for widget-level conditionals
 - Use `SpFeatureFlag.getFeature()` for logic-level checks
@@ -432,6 +439,7 @@ showSnackBar("Undo available");
 ```
 
 **Best Practices**:
+
 - Use `showToast()` for brief, non-critical feedback
 - Use `showMessage()` for confirmations requiring user action
 - Use `showSnackBar()` for actionable messages with undo
@@ -488,6 +496,7 @@ EventBus.unregister([1, 2]);
 ```
 
 **Best Practices**:
+
 - Define event IDs as constants in a dedicated file
 - Unregister in `dispose()` to prevent memory leaks
 - Use for cross-feature communication only — prefer direct calls otherwise
@@ -521,6 +530,7 @@ dart run sp_kit:feature_add --name profile
 ```
 
 **Recommended Structure**:
+
 ```
 lib/
   core/
@@ -569,7 +579,7 @@ testWidgets('Observe rebuilds on value change', (tester) async {
     ),
   );
   expect(find.text('0'), findsOneWidget);
-  
+
   counter.value = 5;
   await tester.pump();
   expect(find.text('5'), findsOneWidget);
