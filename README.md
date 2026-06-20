@@ -1030,10 +1030,54 @@ dart run sp_kit:feature_add --name <feature_name>
 
 The `example` directory contains a complete Flutter application demonstrating all the features of this library.
 
+## AI Skill for Code Agents
+
+This library includes an AI skill that provides best practices and patterns for AI coding assistants like Claude, Cursor, and other AI-powered development tools.
+
+### What is an AI Skill?
+
+An AI skill is a structured knowledge base that helps AI coding assistants understand how to use this library effectively. It contains:
+
+- Best practices and patterns
+- Code examples and templates
+- Common pitfalls to avoid
+- Architecture guidelines
+
+### Installation
+
+To install the skill for use with AI coding assistants:
+
+```bash
+npx skills add sophoun/sp_kit@flutter-sp-kit -g -y
+```
+
+This installs the skill globally, making it available to AI assistants across all your projects that use `sp_kit`.
+
+### Manual Installation
+
+Alternatively, you can copy the skill file to your local skills directory:
+
+```bash
+# For global installation
+cp .skills/flutter-sp-kit/SKILL.md ~/.agents/skills/flutter-sp-kit/SKILL.md
+
+# For project-specific installation
+mkdir -p .opencode/skills/flutter-sp-kit
+cp .skills/flutter-sp-kit/SKILL.md .opencode/skills/flutter-sp-kit/SKILL.md
+```
+
+### Usage
+
+Once installed, AI assistants will automatically reference the skill when helping you with `sp_kit`-related code. You can also explicitly invoke it:
+
+```text
+Use the flutter-sp-kit skill to help me set up dependency injection
+```
+
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-_Copyright (c) 2025 SOPHOUN NHEUM_
+_Copyright (c) 2026 SOPHOUN NHEUM_
