@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sp_kit/sp_kit.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';
 import 'package:sp_kit/src/widgets/loading_indicator.dart';

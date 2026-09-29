@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A utility class for screen-related calculations.
 /// This class is initialized in the [SpKit] widget.

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension SafePopExtension on BuildContext? {
   /// Handle safe pop for screen

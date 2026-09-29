@@ -1,7 +1,7 @@
 import 'dart:async';
 export 'screen_extension.dart';
 
-import 'package:flutter/material.dart' as material;
+import 'package:material_ui/material_ui.dart' as material;
 import 'package:flutter/widgets.dart';
 import 'package:sp_kit/sp_kit.dart';
 import 'package:sp_kit/src/localization/localize_inherited.dart';

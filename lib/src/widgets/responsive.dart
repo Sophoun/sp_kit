@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// ResponsiveLayout provide a utility widget that can
 /// support small medium and large screen as wish.
